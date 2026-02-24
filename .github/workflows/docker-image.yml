@@ -7,8 +7,6 @@ on:
     branches:
       - main
 
-permissions:
-  packages: write
 jobs:
   build:
     name: Build
@@ -40,6 +38,7 @@ jobs:
           tags: |
             type=sha,format=long,prefix=
             type=ref,event=branch
+            type=ref,event=tag
 
       - name: Build & push
         uses: docker/build-push-action@v6
