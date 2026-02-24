@@ -1,0 +1,5 @@
+/.claude
+/.venv
+/docs
+CLAUDE.md
+Dockerfile
