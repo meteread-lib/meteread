@@ -39,6 +39,7 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=sha,format=long,prefix=
+            type=ref,event=branch
 
       - name: Build & push
         uses: docker/build-push-action@v6
