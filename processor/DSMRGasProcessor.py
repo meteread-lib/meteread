@@ -17,11 +17,17 @@ class DSMRGasProcessor(AbstractProcessor):
             if device.MBUS_DEVICE_TYPE.value == GAS_DEVICE_TYPE:
                 sn = device.MBUS_EQUIPMENT_IDENTIFIER.value
                 reading = device.MBUS_METER_READING
+
                 logger.info(f"gas sn={sn} value={reading.value} {reading.unit}")
+
                 if self.storage:
                     self.storage.write(
                         "gas",
-                        {"sn": sn},
-                        {"value": reading.value},
+                        {
+                            "sn": sn
+                        },
+                        {
+                            "value": reading.value
+                        },
                     )
                 return
