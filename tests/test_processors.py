@@ -107,7 +107,7 @@ class TestDSMRGasProcessor:
 
     def test_prints_reading(self, telegram, caplog):
         DSMRGasProcessor()(telegram)
-        assert 'reading=1234.567 m3' in caplog.messages[0]
+        assert 'value=1234.567 m3' in caplog.messages[0]
 
     def test_writes_to_storage(self, telegram):
         storage = MagicMock()
@@ -115,7 +115,7 @@ class TestDSMRGasProcessor:
         storage.write.assert_called_once_with(
             "gas",
             {"sn": "4730303233353631323930333635383137"},
-            {"reading": Decimal("1234.567")},
+            {"value": Decimal("1234.567")},
         )
 
     def test_does_not_write_to_storage_when_none(self, telegram):

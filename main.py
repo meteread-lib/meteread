@@ -5,16 +5,18 @@ import typer
 from dotenv import load_dotenv
 
 from meter import GenericMeter
-from processor import PassProcessor, DSMRElectricityProcessor, DSMRGasProcessor, ChainProcessor
-from reader import DelayReader, RandomReader, DSMRv5SerialReader, DSMRv5RawReader
+from processor import PassProcessor, DSMRElectricityProcessor, DSMRGasProcessor, ChainProcessor, CameraProcessor
+from reader import DelayReader, RandomReader, DSMRv5SerialReader, DSMRv5RawReader, CameraReader
 from storage import InfluxDBStorage
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s - %(levelname)s]: %(message)s')
 app = typer.Typer()
 
+
 @app.command()
 def main():
     typer.echo("Hello, I am Meteread!")
+
 
 @app.command()
 def read(name: str):
@@ -22,12 +24,12 @@ def read(name: str):
 
     meters = {
         'water': GenericMeter(
-            name='cold water',
+            name='water',
             reader=DelayReader(
-                reader=RandomReader(),
-                delay=1.0
+                reader=CameraReader(device=0, roi=None),
+                delay=60.0
             ),
-            processor=PassProcessor()
+            processor=CameraProcessor(storage=storage)
         ),
         'electricity': GenericMeter(
             name='electricity meter',
@@ -55,7 +57,8 @@ def read(name: str):
                 DSMRGasProcessor(
                     storage=storage
                 ),
-            )        ),
+            )
+        ),
         'raw': GenericMeter(
             name='raw electricity and gas meter',
             reader=DelayReader(

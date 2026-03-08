@@ -4,3 +4,4 @@ from processor.PassProcessor import PassProcessor
 from processor.DSMRElectricityProcessor import DSMRElectricityProcessor
 from processor.DSMRGasProcessor import DSMRGasProcessor
 from processor.ChainProcessor import ChainProcessor
+from processor.CameraProcessor import CameraProcessor

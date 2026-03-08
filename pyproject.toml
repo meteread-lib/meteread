@@ -9,6 +9,8 @@ dependencies = [
     "influxdb3-python>=0.7",
     "load-dotenv>=0.1.0",
     "typer>=0.19.2",
+    "opencv-python>=4.9",
+    "pytesseract>=0.3.13",
 ]
 
 [dependency-groups]

@@ -51,7 +51,7 @@ class TestGasCsvPipeline:
         assert csv_row["sn"] == "4730303233353631323930333635383137"
 
     def test_reading(self, csv_row):
-        assert Decimal(csv_row["reading"]) == Decimal("1234.567")
+        assert Decimal(csv_row["value"]) == Decimal("1234.567")
 
 
 class TestMeterCsvPipeline:
