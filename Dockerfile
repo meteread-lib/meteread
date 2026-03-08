@@ -10,6 +10,8 @@ COPY . /app
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr && rm -rf /var/lib/apt/lists/*
+
 RUN pip install --upgrade uv && uv sync --locked
 
 ENTRYPOINT ["uv", "run", "python", "main.py"]

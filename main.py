@@ -107,10 +107,10 @@ def read(name: str):
             ),
             processor=ChainProcessor(
                 DSMRElectricityProcessor(
-                    storage=storage
+                    storage=electricity_storage
                 ),
                 DSMRGasProcessor(
-                    storage=storage
+                    storage=gas_storage
                 ),
             )
         ),
