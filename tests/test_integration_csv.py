@@ -13,7 +13,7 @@ class TestElectricityCsvPipeline:
     @pytest.fixture
     def csv_row(self, tmp_path, telegram):
         path = tmp_path / "readings.csv"
-        DSMRElectricityProcessor(storage=CsvStorage(str(path)))(telegram)
+        DSMRElectricityProcessor(storage=CsvStorage(measurement="electricity", path=str(path)))(telegram)
         with open(path) as f:
             return next(csv.DictReader(f))
 
@@ -24,23 +24,23 @@ class TestElectricityCsvPipeline:
         assert csv_row["sn"] == "4530303334303034363639353537343136"
 
     def test_tariff_1(self, csv_row):
-        assert Decimal(csv_row["t1"]) == Decimal("1234.567")
+        assert Decimal(csv_row["used_tariff_1"]) == Decimal("1234.567")
 
     def test_tariff_2(self, csv_row):
-        assert Decimal(csv_row["t2"]) == Decimal("2345.678")
+        assert Decimal(csv_row["used_tariff_2"]) == Decimal("2345.678")
 
     def test_current_usage(self, csv_row):
-        assert Decimal(csv_row["current"]) == Decimal("1.500")
+        assert Decimal(csv_row["usage"]) == Decimal("1.500")
 
     def test_returned(self, csv_row):
-        assert Decimal(csv_row["returned"]) == Decimal("0.000")
+        assert Decimal(csv_row["delivery"]) == Decimal("0.000")
 
 
 class TestGasCsvPipeline:
     @pytest.fixture
     def csv_row(self, tmp_path, telegram):
         path = tmp_path / "readings.csv"
-        DSMRGasProcessor(storage=CsvStorage(str(path)))(telegram)
+        DSMRGasProcessor(storage=CsvStorage(measurement="gas", path=str(path)))(telegram)
         with open(path) as f:
             return next(csv.DictReader(f))
 
@@ -60,7 +60,7 @@ class TestMeterCsvPipeline:
         meter = GenericMeter(
             name='test',
             reader=DSMRv5RawReader(raw=raw_telegram_v5),
-            processor=DSMRElectricityProcessor(storage=CsvStorage(str(path))),
+            processor=DSMRElectricityProcessor(storage=CsvStorage(measurement="electricity", path=str(path))),
         )
         meter()
         assert path.exists()
@@ -70,7 +70,7 @@ class TestMeterCsvPipeline:
         meter = GenericMeter(
             name='test',
             reader=DSMRv5RawReader(raw=raw_telegram_v5),
-            processor=DSMRElectricityProcessor(storage=CsvStorage(str(path))),
+            processor=DSMRElectricityProcessor(storage=CsvStorage(measurement="electricity", path=str(path))),
         )
         meter()
         with open(path) as f:
@@ -80,7 +80,7 @@ class TestMeterCsvPipeline:
 
     def test_repeated_meter_calls_append_rows(self, tmp_path, raw_telegram_v5):
         path = tmp_path / "readings.csv"
-        storage = CsvStorage(str(path))
+        storage = CsvStorage(measurement="raw", path=str(path))
         meter = GenericMeter(
             name='test',
             reader=DSMRv5RawReader(raw=raw_telegram_v5),
@@ -99,8 +99,8 @@ class TestMeterCsvPipeline:
             name='test',
             reader=DSMRv5RawReader(raw=raw_telegram_v5),
             processor=ChainProcessor(
-                DSMRElectricityProcessor(storage=CsvStorage(str(elec_path))),
-                DSMRGasProcessor(storage=CsvStorage(str(gas_path))),
+                DSMRElectricityProcessor(storage=CsvStorage(measurement="electricity", path=str(elec_path))),
+                DSMRGasProcessor(storage=CsvStorage(measurement="gas", path=str(gas_path))),
             ),
         )
         meter()

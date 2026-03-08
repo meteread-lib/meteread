@@ -33,7 +33,8 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.fixture
 def storage():
-    return InfluxDBStorage(host=INFLUXDB_HOST, token=INFLUXDB_TOKEN, database=INFLUXDB_DATABASE)
+    return InfluxDBStorage(measurement="electricity", host=INFLUXDB_HOST, token=INFLUXDB_TOKEN, database=INFLUXDB_DATABASE)
+
 
 
 @pytest.fixture
@@ -52,30 +53,30 @@ class TestElectricityInfluxDBPipeline:
     def test_writes_tariff_1(self, storage, client, telegram):
         DSMRElectricityProcessor(storage=storage)(telegram)
         table = client.query(
-            f"SELECT t1 FROM electricity WHERE sn = '{ELECTRICITY_SN}' ORDER BY time DESC LIMIT 1"
+            f"SELECT used_tariff_1 FROM electricity WHERE sn = '{ELECTRICITY_SN}' ORDER BY time DESC LIMIT 1"
         )
-        assert pytest.approx(table.column('t1').to_pylist()[0], abs=0.001) == 1234.567
+        assert pytest.approx(table.column('used_tariff_1').to_pylist()[0], abs=0.001) == 1234.567
 
     def test_writes_tariff_2(self, storage, client, telegram):
         DSMRElectricityProcessor(storage=storage)(telegram)
         table = client.query(
-            f"SELECT t2 FROM electricity WHERE sn = '{ELECTRICITY_SN}' ORDER BY time DESC LIMIT 1"
+            f"SELECT used_tariff_2 FROM electricity WHERE sn = '{ELECTRICITY_SN}' ORDER BY time DESC LIMIT 1"
         )
-        assert pytest.approx(table.column('t2').to_pylist()[0], abs=0.001) == 2345.678
+        assert pytest.approx(table.column('used_tariff_2').to_pylist()[0], abs=0.001) == 2345.678
 
     def test_writes_current(self, storage, client, telegram):
         DSMRElectricityProcessor(storage=storage)(telegram)
         table = client.query(
-            f"SELECT current FROM electricity WHERE sn = '{ELECTRICITY_SN}' ORDER BY time DESC LIMIT 1"
+            f"SELECT usage FROM electricity WHERE sn = '{ELECTRICITY_SN}' ORDER BY time DESC LIMIT 1"
         )
-        assert pytest.approx(table.column('current').to_pylist()[0], abs=0.001) == 1.500
+        assert pytest.approx(table.column('usage').to_pylist()[0], abs=0.001) == 1.500
 
     def test_writes_returned(self, storage, client, telegram):
         DSMRElectricityProcessor(storage=storage)(telegram)
         table = client.query(
-            f"SELECT returned FROM electricity WHERE sn = '{ELECTRICITY_SN}' ORDER BY time DESC LIMIT 1"
+            f"SELECT delivery FROM electricity WHERE sn = '{ELECTRICITY_SN}' ORDER BY time DESC LIMIT 1"
         )
-        assert pytest.approx(table.column('returned').to_pylist()[0], abs=0.001) == 0.000
+        assert pytest.approx(table.column('delivery').to_pylist()[0], abs=0.001) == 0.000
 
 
 class TestGasInfluxDBPipeline:

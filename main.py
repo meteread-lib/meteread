@@ -20,7 +20,9 @@ def main():
 
 @app.command()
 def read(name: str):
-    storage = InfluxDBStorage(host=os.getenv('INFLUXDB_URL'), database='meteread')
+    electricity_storage = InfluxDBStorage(host=os.getenv('INFLUXDB_URL'), database='meteread', measurement='electricity')
+    gas_storage = InfluxDBStorage(host=os.getenv('INFLUXDB_URL'), database='meteread', measurement='gas')
+    water_storage = InfluxDBStorage(host=os.getenv('INFLUXDB_URL'), database='meteread', measurement='water')
 
     meters = {
         'water': GenericMeter(
@@ -29,7 +31,7 @@ def read(name: str):
                 reader=CameraReader(device=0, roi=None),
                 delay=60.0
             ),
-            processor=CameraProcessor(storage=storage)
+            processor=CameraProcessor(storage=water_storage)
         ),
         'electricity': GenericMeter(
             name='electricity meter',
@@ -52,10 +54,10 @@ def read(name: str):
             ),
             processor=ChainProcessor(
                 DSMRElectricityProcessor(
-                    storage=storage
+                    storage=electricity_storage
                 ),
                 DSMRGasProcessor(
-                    storage=storage
+                    storage=gas_storage
                 ),
             )
         ),

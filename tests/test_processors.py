@@ -49,9 +49,9 @@ class TestDSMRElectricityProcessor:
     def test_returns_none(self, telegram):
         assert DSMRElectricityProcessor()(telegram) is None
 
-    def test_prints_electricity_line(self, telegram, caplog):
+    def test_prints_sn_line(self, telegram, caplog):
         DSMRElectricityProcessor()(telegram)
-        assert caplog.messages[0].startswith('electricity')
+        assert caplog.messages[0].startswith('sn')
 
     def test_prints_serial_number(self, telegram, caplog):
         DSMRElectricityProcessor()(telegram)
@@ -59,31 +59,30 @@ class TestDSMRElectricityProcessor:
 
     def test_prints_tariff_1(self, telegram, caplog):
         DSMRElectricityProcessor()(telegram)
-        assert 't1=1234.567kWh' in caplog.messages[0]
+        assert 'sn=4530303334303034363639353537343136, used_tariff_1=1234.567 kWh, used_tariff_2=2345.678 kWh, usage=1.500 kW, delivery=0.000 kW' in caplog.messages[0]
 
     def test_prints_tariff_2(self, telegram, caplog):
         DSMRElectricityProcessor()(telegram)
-        assert 't2=2345.678kWh' in caplog.messages[0]
+        assert 'sn=4530303334303034363639353537343136, used_tariff_1=1234.567 kWh, used_tariff_2=2345.678 kWh, usage=1.500 kW, delivery=0.000 kW' in caplog.messages[0]
 
     def test_prints_current_usage(self, telegram, caplog):
         DSMRElectricityProcessor()(telegram)
-        assert 'now=1.500kW' in caplog.messages[0]
+        assert 'sn=4530303334303034363639353537343136, used_tariff_1=1234.567 kWh, used_tariff_2=2345.678 kWh, usage=1.500 kW, delivery=0.000 kW' in caplog.messages[0]
 
     def test_prints_current_delivery(self, telegram, caplog):
         DSMRElectricityProcessor()(telegram)
-        assert 'returned=0.000kW' in caplog.messages[0]
+        assert 'sn=4530303334303034363639353537343136, used_tariff_1=1234.567 kWh, used_tariff_2=2345.678 kWh, usage=1.500 kW, delivery=0.000 kW' in caplog.messages[0]
 
     def test_writes_to_storage(self, telegram):
         storage = MagicMock()
         DSMRElectricityProcessor(storage=storage)(telegram)
         storage.write.assert_called_once_with(
-            "electricity",
             {"sn": "4530303334303034363639353537343136"},
             {
-                "t1": Decimal("1234.567"),
-                "t2": Decimal("2345.678"),
-                "current": Decimal("1.500"),
-                "returned": Decimal("0.000"),
+                "used_tariff_1": Decimal("1234.567"),
+                "used_tariff_2": Decimal("2345.678"),
+                "usage": Decimal("1.500"),
+                "delivery": Decimal("0.000"),
             },
         )
 
@@ -97,9 +96,9 @@ class TestDSMRGasProcessor:
     def test_returns_none(self, telegram):
         assert DSMRGasProcessor()(telegram) is None
 
-    def test_prints_gas_line(self, telegram, caplog):
+    def test_prints_sn_line(self, telegram, caplog):
         DSMRGasProcessor()(telegram)
-        assert caplog.messages[0].startswith('gas')
+        assert caplog.messages[0].startswith('sn')
 
     def test_prints_serial_number(self, telegram, caplog):
         DSMRGasProcessor()(telegram)
@@ -113,7 +112,6 @@ class TestDSMRGasProcessor:
         storage = MagicMock()
         DSMRGasProcessor(storage=storage)(telegram)
         storage.write.assert_called_once_with(
-            "gas",
             {"sn": "4730303233353631323930333635383137"},
             {"value": Decimal("1234.567")},
         )

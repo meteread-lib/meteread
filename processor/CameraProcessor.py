@@ -16,10 +16,16 @@ class CameraProcessor(AbstractProcessor):
         raw_text = data["raw_text"]
 
         if value is None:
-            logger.warning(f"camera read failed: raw_text={raw_text!r} confidence={confidence}")
+            logger.warning(
+                f"camera read failed: "
+                f"raw_text={raw_text!r} "
+                f"confidence={confidence}")
             return
 
-        logger.info(f"camera value={value} confidence={confidence:.2f} raw={raw_text!r}")
+        logger.info(
+            f"camera value={value} "
+            f"confidence={confidence:.2f} "
+            f"raw={raw_text!r}")
 
         if self.storage:
-            self.storage.write("water", {}, {"value": value})
+            self.storage.write({"sn": None}, {"value": value})

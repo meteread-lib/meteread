@@ -3,6 +3,9 @@ from datetime import datetime
 
 
 class AbstractStorage(ABC):
+    def __init__(self, measurement: str):
+        self.measurement = measurement
+
     @abstractmethod
-    def write(self, measurement: str, tags: dict, fields: dict, timestamp: datetime | None = None) -> None:
+    def write(self, tags: dict, fields: dict, timestamp: datetime | None = None) -> None:
         pass

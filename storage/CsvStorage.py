@@ -9,14 +9,15 @@ logger = logging.getLogger(__name__)
 
 
 class CsvStorage(AbstractStorage):
-    def __init__(self, path: str):
+    def __init__(self, measurement: str, path: str):
+        super().__init__(measurement=measurement)
         self.path = Path(path)
 
-    def write(self, measurement: str, tags: dict, fields: dict, timestamp: datetime | None = None) -> None:
+    def write(self, tags: dict, fields: dict, timestamp: datetime | None = None) -> None:
         if timestamp is None:
             timestamp = datetime.now(timezone.utc)
 
-        row = {"timestamp": timestamp.isoformat(), "measurement": measurement, **tags, **fields}
+        row = {"timestamp": timestamp.isoformat(), "measurement": self.measurement, **tags, **fields}
 
         write_header = not self.path.exists()
         with open(self.path, "a", newline="") as f:
@@ -25,4 +26,4 @@ class CsvStorage(AbstractStorage):
                 writer.writeheader()
             writer.writerow(row)
 
-        logger.info(f"csv write: {measurement} {fields}")
+        logger.info(f"csv write: {self.measurement} {fields}")

@@ -18,11 +18,13 @@ class DSMRGasProcessor(AbstractProcessor):
                 sn = device.MBUS_EQUIPMENT_IDENTIFIER.value
                 reading = device.MBUS_METER_READING
 
-                logger.info(f"gas sn={sn} value={reading.value} {reading.unit}")
+                logger.info(
+                    f"sn={sn}, "
+                    f"value={reading.value} {reading.unit}"
+                )
 
                 if self.storage:
                     self.storage.write(
-                        "gas",
                         {
                             "sn": sn
                         },

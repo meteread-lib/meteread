@@ -18,17 +18,15 @@ class DSMRElectricityProcessor(AbstractProcessor):
         delivery = data.CURRENT_ELECTRICITY_DELIVERY
 
         logger.info(
-            f"electricity "
-            f"sn={sn} "
-            f"used_tariff_1={used_tariff_1.value} {used_tariff_1.unit} "
-            f"used_tariff_2={used_tariff_2.value} {used_tariff_2.unit} "
-            f"usage={usage.value} {usage.unit} "
+            f"sn={sn}, "
+            f"used_tariff_1={used_tariff_1.value} {used_tariff_1.unit}, "
+            f"used_tariff_2={used_tariff_2.value} {used_tariff_2.unit}, "
+            f"usage={usage.value} {usage.unit}, "
             f"delivery={delivery.value} {delivery.unit}"
         )
 
         if self.storage:
             self.storage.write(
-                "electricity",
                 {
                     "sn": sn,
                 },

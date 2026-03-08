@@ -30,19 +30,19 @@ class TestAbstractStorage:
 class TestCsvStorage:
     def test_creates_file_on_first_write(self, tmp_path):
         path = tmp_path / "readings.csv"
-        CsvStorage(str(path)).write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
+        CsvStorage(measurement=MEASUREMENT, path=str(path)).write(TAGS, FIELDS, TIMESTAMP)
         assert path.exists()
 
     def test_writes_header_on_first_write(self, tmp_path):
         path = tmp_path / "readings.csv"
-        CsvStorage(str(path)).write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
+        CsvStorage(measurement=MEASUREMENT, path=str(path)).write(TAGS, FIELDS, TIMESTAMP)
         with open(path) as f:
             header = f.readline().strip()
         assert header == "timestamp,measurement,sn,t1,t2"
 
     def test_writes_data_row(self, tmp_path):
         path = tmp_path / "readings.csv"
-        CsvStorage(str(path)).write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
+        CsvStorage(measurement=MEASUREMENT, path=str(path)).write(TAGS, FIELDS, TIMESTAMP)
         with open(path) as f:
             reader = csv.DictReader(f)
             row = next(reader)
@@ -54,9 +54,9 @@ class TestCsvStorage:
 
     def test_appends_without_repeating_header(self, tmp_path):
         path = tmp_path / "readings.csv"
-        storage = CsvStorage(str(path))
-        storage.write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
-        storage.write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
+        storage = CsvStorage(measurement=MEASUREMENT, path=str(path))
+        storage.write(TAGS, FIELDS, TIMESTAMP)
+        storage.write(TAGS, FIELDS, TIMESTAMP)
         with open(path) as f:
             lines = f.readlines()
         assert len(lines) == 3  # 1 header + 2 data rows
@@ -64,7 +64,7 @@ class TestCsvStorage:
     def test_uses_current_time_when_timestamp_is_none(self, tmp_path):
         path = tmp_path / "readings.csv"
         before = datetime.now(timezone.utc)
-        CsvStorage(str(path)).write(MEASUREMENT, TAGS, FIELDS)
+        CsvStorage(measurement=MEASUREMENT, path=str(path)).write(TAGS, FIELDS)
         after = datetime.now(timezone.utc)
         with open(path) as f:
             row = next(csv.DictReader(f))
@@ -73,7 +73,7 @@ class TestCsvStorage:
 
     def test_returns_none(self, tmp_path):
         path = tmp_path / "readings.csv"
-        result = CsvStorage(str(path)).write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
+        result = CsvStorage(measurement=MEASUREMENT, path=str(path)).write(TAGS, FIELDS, TIMESTAMP)
         assert result is None
 
 
@@ -86,17 +86,18 @@ class TestInfluxDBStorage:
     @pytest.fixture
     def storage(self, mock_client):
         return InfluxDBStorage(
+            measurement=MEASUREMENT,
             host="http://localhost:8086",
             token="my-token",
             database="my-database",
         )
 
     def test_creates_client_with_correct_params(self, mock_client):
-        InfluxDBStorage(host="http://host:8086", token="tok", database="db")
+        InfluxDBStorage(measurement=MEASUREMENT, host="http://host:8086", token="tok", database="db")
         mock_client.assert_called_once_with(host="http://host:8086", token="tok", database="db")
 
     def test_write_calls_client_write(self, storage, mock_client):
-        storage.write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
+        storage.write(TAGS, FIELDS, TIMESTAMP)
         mock_client.return_value.write.assert_called_once()
 
     def test_write_point_has_correct_measurement(self, storage, mock_client):
@@ -104,7 +105,7 @@ class TestInfluxDBStorage:
             mock_point.return_value.time.return_value = mock_point.return_value
             mock_point.return_value.tag.return_value = mock_point.return_value
             mock_point.return_value.field.return_value = mock_point.return_value
-            storage.write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
+            storage.write(TAGS, FIELDS, TIMESTAMP)
         mock_point.assert_called_once_with(MEASUREMENT)
 
     def test_write_point_has_correct_tags(self, storage, mock_client):
@@ -112,7 +113,7 @@ class TestInfluxDBStorage:
             mock_point.return_value.time.return_value = mock_point.return_value
             mock_point.return_value.tag.return_value = mock_point.return_value
             mock_point.return_value.field.return_value = mock_point.return_value
-            storage.write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
+            storage.write(TAGS, FIELDS, TIMESTAMP)
         mock_point.return_value.tag.assert_called_once_with("sn", "abc123")
 
     def test_write_point_has_correct_fields(self, storage, mock_client):
@@ -120,7 +121,7 @@ class TestInfluxDBStorage:
             mock_point.return_value.time.return_value = mock_point.return_value
             mock_point.return_value.tag.return_value = mock_point.return_value
             mock_point.return_value.field.return_value = mock_point.return_value
-            storage.write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
+            storage.write(TAGS, FIELDS, TIMESTAMP)
         calls = {call.args for call in mock_point.return_value.field.call_args_list}
         assert calls == {("t1", 1234.567), ("t2", 2345.678)}
 
@@ -129,7 +130,7 @@ class TestInfluxDBStorage:
             mock_point.return_value.time.return_value = mock_point.return_value
             mock_point.return_value.tag.return_value = mock_point.return_value
             mock_point.return_value.field.return_value = mock_point.return_value
-            storage.write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
+            storage.write(TAGS, FIELDS, TIMESTAMP)
         mock_point.return_value.time.assert_called_once_with(TIMESTAMP)
 
     def test_uses_current_time_when_timestamp_is_none(self, storage, mock_client):
@@ -138,11 +139,11 @@ class TestInfluxDBStorage:
             mock_point.return_value.tag.return_value = mock_point.return_value
             mock_point.return_value.field.return_value = mock_point.return_value
             before = datetime.now(timezone.utc)
-            storage.write(MEASUREMENT, TAGS, FIELDS)
+            storage.write(TAGS, FIELDS)
             after = datetime.now(timezone.utc)
         used_ts = mock_point.return_value.time.call_args.args[0]
         assert before <= used_ts <= after
 
     def test_returns_none(self, storage, mock_client):
-        result = storage.write(MEASUREMENT, TAGS, FIELDS, TIMESTAMP)
+        result = storage.write(TAGS, FIELDS, TIMESTAMP)
         assert result is None

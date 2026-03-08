@@ -38,8 +38,7 @@ class TestCameraProcessorCall:
         p = CameraProcessor(storage=storage)
         p(GOOD_READING)
         storage.write.assert_called_once_with(
-            "water",
-            {},
+            {"sn": None},
             {"value": 12345.678},
         )
 
